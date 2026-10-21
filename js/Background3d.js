@@ -29,7 +29,8 @@
         resizeHandler: null,
         pointerHandler: null,
         motionHandler: null,
-        canvas: null
+        canvas: null,
+        fallbackDraw: null
     };
 
     function createFallback() {
@@ -151,12 +152,15 @@
             }
             ctx.restore();
 
-            if (!reduced) state.frame = requestAnimationFrame(draw);
+            if (!reduced && state.running) state.frame = requestAnimationFrame(draw);
         };
         state.resizeHandler = resize;
         window.addEventListener("resize", resize, { passive: true });
         resize();
+        state.fallbackDraw = draw;
+        state.running = !reduced;
         draw();
+        if (state.running) state.frame = requestAnimationFrame(draw);
         if (reduced) console.info("[AFTERHOURS] Reduced-motion canvas atmosphere active.");
         else console.info("[AFTERHOURS] Canvas atmosphere fallback active.");
     }
@@ -379,6 +383,16 @@
     function start() {
         if (state.running || state.destroyed) return;
 
+        if (state.fallbackDraw) {
+            if (REDUCED_MOTION.matches) {
+                state.fallbackDraw();
+                return;
+            }
+            state.running = true;
+            state.frame = requestAnimationFrame(state.fallbackDraw);
+            return;
+        }
+
         if (REDUCED_MOTION.matches) {
             renderStill();
             return;
@@ -434,6 +448,7 @@
 
         if (state.canvas) state.canvas.remove();
 
+        state.fallbackDraw = null;
         state.renderer = null;
         state.scene = null;
         state.camera = null;
