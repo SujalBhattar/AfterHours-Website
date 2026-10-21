@@ -326,6 +326,23 @@
             transition: width .12s linear;
           }
 
+          .vr-relic-status {
+            min-height: 31px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 20px;
+            border-bottom: 1px solid #eeeadd13;
+            color: #898d80;
+            font: 9px/1.6 "DM Mono", monospace;
+            letter-spacing: .1em;
+          }
+
+          .vr-relic-status.is-live {
+            color: ${MOSS};
+            background: linear-gradient(90deg, #a2b58b0c, transparent 75%);
+          }
+
           .vr-toast {
             position: absolute;
             z-index: 4;
@@ -396,6 +413,12 @@
             .vr-arena {
               height: clamp(340px, 56vh, 490px);
               min-height: 330px;
+            }
+
+            .vr-relic-status {
+              padding-inline: 10px;
+              font-size: 8px;
+              letter-spacing: .05em;
             }
 
             .vr-mobile-controls {
@@ -481,6 +504,7 @@
         <div class="vr-progress">
           <div class="vr-progress-fill" data-progress></div>
         </div>
+        <div class="vr-relic-status" data-relic-status aria-live="polite">RELIC SYSTEM // STANDBY</div>
 
         <div class="vr-arena">
           <canvas
@@ -565,6 +589,7 @@
         const mobileSlideButton = $("[data-mobile-slide]");
         const mobilePauseButton = $("[data-mobile-pause]");
         const progressFill = $("[data-progress]");
+        const relicStatus = $("[data-relic-status]");
         const toastEl = $("[data-toast]");
 
         let destroyed = false;
@@ -590,6 +615,11 @@
         let shards = 0;
         let jumps = 0;
         let nearMisses = 0;
+        let shieldCharges = 0;
+        let surgeTimer = 0;
+        let nextTrialAt = 20;
+        let trialActive = 0;
+        let trialProgress = 0;
         let milestones = new Set();
         let lastHudUpdate = 0;
         let lastToast = "";
@@ -722,6 +752,17 @@
 
             progressFill.style.width =
                 `${Math.min(100, (score % 1000) / 10)}%`;
+
+            if (relicStatus) {
+                const parts = [];
+                if (shieldCharges > 0) parts.push("AEGIS SHIELD ×" + shieldCharges);
+                if (surgeTimer > 0) parts.push("OVERDRIVE " + surgeTimer.toFixed(1) + "s");
+                if (trialActive > 0) parts.push("RIFT TRIAL " + trialProgress + "/3");
+                relicStatus.textContent = parts.length
+                    ? parts.join("  //  ")
+                    : "RELIC SYSTEM // COLLECT SHIELDS, OVERDRIVE & RIFT TRIALS";
+                relicStatus.classList.toggle("is-live", parts.length > 0);
+            }
         }
 
         function showToast(message) {
@@ -822,6 +863,11 @@
             shards = 0;
             jumps = 0;
             nearMisses = 0;
+            shieldCharges = 0;
+            surgeTimer = 0;
+            nextTrialAt = 20;
+            trialActive = 0;
+            trialProgress = 0;
             currentBiome = 0;
             lastWorldSpeed = 0;
             pendingJump = false;
@@ -1020,20 +1066,21 @@
             obstacle.passed = false;
             obstacle.seed = random(0, 100);
             obstacle.difficulty = difficulty;
+            obstacle.trial = trialActive > 0;
 
             obstacles.push(obstacle);
         }
 
         function spawnPickup() {
             const high = Math.random() < 0.48;
+            const roll = Math.random();
+            const type = roll < 0.12 ? "shield" : roll < 0.24 ? "surge" : "shard";
 
             pickups.push({
-                type: "shard",
+                type,
                 x: width + 18,
-                y: high
-                    ? groundY - random(100, 155)
-                    : groundY - random(55, 90),
-                r: random(7, 10),
+                y: high ? groundY - random(100, 155) : groundY - random(55, 90),
+                r: type === "shard" ? random(7, 10) : 12,
                 phase: random(0, Math.PI * 2),
                 collected: false
             });
@@ -1119,8 +1166,22 @@
             }
 
             speed = Math.min(2.75, 1 + elapsed * 0.025);
+            surgeTimer = Math.max(0, surgeTimer - dt);
+            trialActive = Math.max(0, trialActive - dt);
+
+            if (elapsed >= nextTrialAt && trialActive <= 0) {
+                trialActive = 8;
+                trialProgress = 0;
+                nextTrialAt += 30;
+                showToast("RIFT TRIAL // CLEAR 3 OBSTACLES");
+                burst(width * 0.72, height * 0.28, MOSS, 18, 150);
+            } else if (trialActive <= 0 && trialProgress > 0 && trialProgress < 3) {
+                showToast("RIFT TRIAL MISSED · KEEP MOVING");
+                trialProgress = 0;
+            }
+
             const worldSpeed =
-                250 * speed * clamp(width / 760, 0.8, 1.45);
+                250 * speed * (surgeTimer > 0 ? 1.22 : 1) * clamp(width / 760, 0.8, 1.45);
 
             lastWorldSpeed = worldSpeed;
 
@@ -1221,8 +1282,17 @@
                     playerBox.y + playerBox.h > box.y;
 
                 if (hit && player.invulnerable <= 0) {
-                    crash();
-                    return;
+                    if (shieldCharges > 0) {
+                        shieldCharges--;
+                        player.invulnerable = 1.8;
+                        screenShake = reducedMotion.matches ? 0 : 5;
+                        flash = 0.22;
+                        burst(player.x + player.w / 2, player.y + player.h / 2, MOSS, 22, 190);
+                        showToast("AEGIS SHIELD BROKE · RUN SAVED");
+                    } else {
+                        crash();
+                        return;
+                    }
                 }
 
                 if (box.x + box.w < playerBox.x && !obstacle.passed) {
@@ -1230,6 +1300,18 @@
                     nearMisses++;
                     score += 15 * Math.max(1, 1 + Math.floor(combo / 4));
                     addCombo();
+
+                    if (obstacle.trial && trialActive > 0) {
+                        trialProgress++;
+                        score += 75;
+                        burst(player.x + player.w, groundY - 18, MOSS, 8, 100);
+                        if (trialProgress >= 3) {
+                            trialActive = 0;
+                            score += 250;
+                            shards += 3;
+                            showToast("RIFT TRIAL CLEARED · +250 / 3 SHARDS");
+                        }
+                    }
 
                     if (nearMisses % 5 === 0) {
                         showToast("CLEAN RUN ✳ +15");
@@ -1254,14 +1336,23 @@
 
                 if (!pickup.collected && distance < pickup.r + 24) {
                     pickup.collected = true;
-                    shards++;
-                    score += 60 * Math.max(1, 1 + Math.floor(combo / 4));
-                    addCombo();
-
-                    burst(pickup.x, pickup.y, MOSS, 12, 125);
+                    burst(pickup.x, pickup.y, pickup.type === "surge" ? CLAY : MOSS, 15, 145);
                     flash = 0.14;
 
-                    showToast(`FRAGMENT +60 · ${shards}`);
+                    if (pickup.type === "shield") {
+                        shieldCharges = Math.min(1, shieldCharges + 1);
+                        score += 90;
+                        showToast("AEGIS SHIELD ACQUIRED · ONE SAVE");
+                    } else if (pickup.type === "surge") {
+                        surgeTimer = Math.max(surgeTimer, 6);
+                        score += 100;
+                        showToast("OVERDRIVE ONLINE · BONUS SCORE");
+                    } else {
+                        shards++;
+                        score += 60 * Math.max(1, 1 + Math.floor(combo / 4));
+                        addCombo();
+                        showToast(`FRAGMENT +60 · ${shards}`);
+                    }
                 }
             }
 
@@ -1577,27 +1668,37 @@
         function drawPickups() {
             for (const pickup of pickups) {
                 if (pickup.collected) continue;
-
                 const bob = Math.sin(pickup.phase) * 4;
                 const x = pickup.x;
                 const y = pickup.y + bob;
+                const powerColor = pickup.type === "surge" ? CLAY : MOSS;
 
                 ctx.save();
                 ctx.translate(x, y);
                 ctx.rotate(Math.PI / 4 + Math.sin(pickup.phase) * 0.14);
-
-                ctx.shadowColor = MOSS;
-                ctx.shadowBlur = 16;
-                ctx.fillStyle = "#a2b58b22";
+                ctx.shadowColor = powerColor;
+                ctx.shadowBlur = pickup.type === "shard" ? 16 : 23;
+                ctx.fillStyle = pickup.type === "shard" ? "#a2b58b22" : powerColor + "33";
                 ctx.fillRect(-pickup.r * 1.6, -pickup.r * 1.6, pickup.r * 3.2, pickup.r * 3.2);
-
                 ctx.shadowBlur = 0;
-                ctx.fillStyle = MOSS;
-                ctx.fillRect(-pickup.r * 0.7, -pickup.r * 0.7, pickup.r * 1.4, pickup.r * 1.4);
+                ctx.fillStyle = powerColor;
+
+                if (pickup.type === "shield") {
+                    ctx.beginPath();
+                    ctx.moveTo(0, -pickup.r);
+                    ctx.lineTo(pickup.r * 0.78, -pickup.r * 0.45);
+                    ctx.lineTo(pickup.r * 0.62, pickup.r * 0.5);
+                    ctx.lineTo(0, pickup.r);
+                    ctx.lineTo(-pickup.r * 0.62, pickup.r * 0.5);
+                    ctx.lineTo(-pickup.r * 0.78, -pickup.r * 0.45);
+                    ctx.closePath();
+                    ctx.fill();
+                } else {
+                    ctx.fillRect(-pickup.r * 0.7, -pickup.r * 0.7, pickup.r * 1.4, pickup.r * 1.4);
+                }
 
                 ctx.fillStyle = "#edf2e3";
                 ctx.fillRect(-1.5, -pickup.r * 0.4, 3, pickup.r * 0.8);
-
                 ctx.restore();
             }
         }
@@ -1738,6 +1839,21 @@
 
             for (const obstacle of obstacles) {
                 drawObstacle(obstacle);
+            }
+
+            if (trialActive > 0) {
+                ctx.save();
+                ctx.globalAlpha = 0.7 + Math.sin(worldTime * 9) * 0.2;
+                ctx.strokeStyle = MOSS;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 8]);
+                ctx.strokeRect(12, 12, width - 24, height - 24);
+                ctx.setLineDash([]);
+                ctx.fillStyle = MOSS;
+                ctx.font = '10px "DM Mono", monospace';
+                ctx.textAlign = "center";
+                ctx.fillText("RIFT TRIAL  " + trialProgress + "/3", width / 2, 29);
+                ctx.restore();
             }
 
             drawPickups();
