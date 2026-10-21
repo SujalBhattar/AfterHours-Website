@@ -6,27 +6,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#171915">
     <meta name="color-scheme" content="dark">
-    <link rel="icon"
-        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%2365775a'/%3E%3Ctext x='16' y='23' font-size='22' text-anchor='middle' fill='%23eeeadd' font-family='serif' font-style='italic'%3Ea.%3C/text%3E%3C/svg%3E">
     <meta name="description"
         content="AFTERHOURS is a little digital playground. Play, explore, and lose track of time.">
+
     <title>AFTERHOURS — A Little Digital Playground</title>
 
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%2365775a'/%3E%3Ctext x='16' y='23' font-size='22' text-anchor='middle' fill='%23eeeadd' font-family='serif' font-style='italic'%3Ea.%3C/text%3E%3C/svg%3E">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;450;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Space+Grotesk:wght@500;600&display=swap"
         rel="stylesheet">
 
-    <link rel="stylesheet" href="css/style.css">
+    <!-- Correct stylesheet path -->
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 
 <body>
-    <!-- Live background layers: 3D scene (three.js) with 2D canvas fallback -->
+    <!-- Background layers -->
     <div id="bg3d" aria-hidden="true"></div>
     <canvas id="ambient-canvas" aria-hidden="true"></canvas>
     <div id="ambient-sculpture" aria-hidden="true"></div>
 
+    <!-- Header -->
     <header class="ah-header">
         <a class="ah-logo" href="#top" aria-label="AFTERHOURS home">
             <span class="ah-logo__mark" aria-hidden="true">a.</span>
@@ -45,6 +50,7 @@
     </header>
 
     <main>
+        <!-- Hero -->
         <section class="ah-hero" id="top">
             <div class="ah-hero__copy">
                 <p class="ah-eyebrow">
@@ -68,13 +74,14 @@
                     <span aria-hidden="true">↘</span>
                 </a>
 
-                <p class="ah-hero__note">MADE FOR THE SPACE BETWEEN EVERYTHING.</p>
+                <p class="ah-hero__note">
+                    MADE FOR THE SPACE BETWEEN EVERYTHING.
+                </p>
             </div>
 
             <div class="ah-hero__art" aria-hidden="true">
-                <!-- Live 3D model (hero3d.js). The CSS planet below is the fallback. -->
+                <!-- Live 3D hero with CSS fallback -->
                 <div class="ah-hero__model" id="hero3d"></div>
-
 
                 <div class="ah-portal">
                     <div class="ah-portal__back"></div>
@@ -93,6 +100,7 @@
             </div>
         </section>
 
+        <!-- Marquee -->
         <div class="ah-marquee" aria-label="Play without a purpose">
             <div class="ah-marquee__track" aria-hidden="true">
                 <span>PLAY WITHOUT A PURPOSE</span><span>✳</span>
@@ -104,6 +112,7 @@
             </div>
         </div>
 
+        <!-- Arcade -->
         <section class="ah-arcade" id="arcade">
             <div class="ah-section-heading">
                 <div>
@@ -121,9 +130,11 @@
             </div>
 
             <div class="ah-game-grid">
-                <!-- LIGHTSPEED -->
+
+                <!-- Lightspeed -->
                 <button class="ah-game-card ah-game-card--lightspeed" type="button" data-open-game="lightspeed"
                     aria-label="Play Lightspeed, a fast reflex game">
+
                     <span class="ah-game-card__art" aria-hidden="true">
                         <span class="ah-lightspeed-art">
                             <span class="ah-lightspeed-art__gate ah-lightspeed-art__gate--back"></span>
@@ -149,9 +160,10 @@
                     </span>
                 </button>
 
-                <!-- VOIDRUN -->
+                <!-- Voidrun -->
                 <button class="ah-game-card ah-game-card--voidrun" type="button" data-open-game="voidrun"
                     aria-label="Play Voidrun, an endless running game">
+
                     <span class="ah-game-card__art" aria-hidden="true">
                         <span class="ah-voidrun-art">
                             <span class="ah-voidrun-art__sun"></span>
@@ -177,9 +189,10 @@
                     </span>
                 </button>
 
-                <!-- ECHO CHAMBER -->
+                <!-- Echo Chamber -->
                 <button class="ah-game-card ah-game-card--echo" type="button" data-open-game="echo-chamber"
                     aria-label="Play Echo Chamber, a memory game">
+
                     <span class="ah-game-card__art" aria-hidden="true">
                         <span class="ah-echo-art">
                             <span class="ah-echo-art__orbit ah-echo-art__orbit--one"></span>
@@ -207,9 +220,10 @@
                     </span>
                 </button>
 
-                <!-- DRIFT -->
+                <!-- Drift -->
                 <button class="ah-game-card ah-game-card--drift" type="button" data-open-game="drift"
                     aria-label="Play Drift, an atmospheric driving game">
+
                     <span class="ah-game-card__art" aria-hidden="true">
                         <span class="ah-drift-art">
                             <span class="ah-drift-art__moon"></span>
@@ -235,6 +249,7 @@
                         </span>
                     </span>
                 </button>
+
             </div>
 
             <p class="ah-arcade__footnote">
@@ -243,7 +258,7 @@
             </p>
         </section>
 
-        <!-- GAME STAGE: existing launcher IDs preserved -->
+        <!-- Game stage: IDs retained for main.js -->
         <section class="ah-stage" id="game-stage" hidden>
             <div class="ah-stage__top">
                 <div>
@@ -263,6 +278,7 @@
             <div class="ah-stage__frame" id="game-mount"></div>
         </section>
 
+        <!-- About -->
         <section class="ah-about" id="about">
             <div class="ah-about__visual" aria-hidden="true">
                 <div class="ah-about__circle ah-about__circle--outer"></div>
@@ -275,40 +291,69 @@
                     <span class="ah-eyebrow__line"></span>
                     A SMALL REMINDER
                 </p>
-                <h2>Not everything<br>needs a <em>purpose.</em></h2>
+
+                <h2>
+                    Not everything<br>
+                    needs a <em>purpose.</em>
+                </h2>
+
                 <p>
                     Some things can simply be fun. No progress to optimise,
                     no productivity hack to unlock. Just a place to wander,
                     play a little, and return to your day when you're ready.
                 </p>
+
                 <a href="#arcade" class="ah-text-link">
-                    Find your next distraction <span aria-hidden="true">↗</span>
+                    Find your next distraction
+                    <span aria-hidden="true">↗</span>
                 </a>
             </div>
         </section>
     </main>
 
+    <!-- Footer -->
     <footer class="ah-footer">
-        <a class="ah-logo" href="#top">
+        <a class="ah-logo" href="#top" aria-label="Back to AFTERHOURS home">
             <span class="ah-logo__mark" aria-hidden="true">a.</span>
             <span>AFTERHOURS</span>
         </a>
 
         <p>MADE FOR THE SPACE BETWEEN EVERYTHING.</p>
-        <a href="#top" class="ah-footer__top">BACK TO TOP ↑</a>
+
+        <a href="#top" class="ah-footer__top">
+            BACK TO TOP ↑
+        </a>
     </footer>
 
-    <div class="ah-toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <!-- Status message -->
+    <div class="ah-toast" id="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
 
-    <!-- Keep existing game scripts and their IDs unchanged. -->
-    <script src="js/ambient.js" defer></script>
-    <script src="js/background3d.js" defer></script>
-    <script src="js/hero3d.js" defer></script>
-    <script src="js/games/lightspeed.js" defer></script>
-    <script src="js/games/voidrun.js" defer></script>
-    <script src="js/games/echo-chamber.js" defer></script>
-    <script src="js/games/drift.js" defer></script>
-    <script src="js/main.js" defer></script>
+    <!--
+        Actual project structure:
+        css/style.css
+        js/ambient.js
+        js/Background3d.js
+        js/Hero3d.js
+        js/main.js
+        js/games/lightspeed.js
+        js/games/voidrun.js
+        js/games/echo-chamber.js
+        js/games/drift.js
+    -->
+
+    <!-- Background scripts -->
+    <script src="./js/ambient.js" defer></script>
+    <script src="./js/Background3d.js" defer></script>
+    <script src="./js/Hero3d.js" defer></script>
+
+    <!-- Game scripts register before the launcher runs -->
+    <script src="./js/games/lightspeed.js" defer></script>
+    <script src="./js/games/voidrun.js" defer></script>
+    <script src="./js/games/echo-chamber.js" defer></script>
+    <script src="./js/games/drift.js" defer></script>
+
+    <!-- Game launcher -->
+    <script src="./js/main.js" defer></script>
 </body>
 
 </html>
