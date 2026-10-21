@@ -174,9 +174,10 @@
             THREE = await import(THREE_URL);
         } catch (error) {
             console.warn(
-                "[AFTERHOURS] Three.js background unavailable. CSS atmosphere remains active.",
+                "[AFTERHOURS] Three.js CDN unavailable; starting animated canvas fallback.",
                 error
             );
+            createFallback();
             return;
         }
 
@@ -193,7 +194,7 @@
             height: "100%",
             zIndex: "0",
             pointerEvents: "none",
-            opacity: "0.28"
+            opacity: "0.82"
         });
 
         const backgroundHost = document.getElementById("bg3d");
@@ -212,9 +213,10 @@
             state.canvas = null;
 
             console.warn(
-                "[AFTERHOURS] WebGL is unavailable; using CSS background.",
+                "[AFTERHOURS] WebGL is unavailable; starting animated canvas fallback.",
                 error
             );
+            createFallback();
             return;
         }
 
