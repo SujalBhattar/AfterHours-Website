@@ -4,6 +4,7 @@
 
     const GAME_ID = "voidrun";
     const STORAGE_KEY = "afterhours-voidrun-best";
+    const META_KEY = "afterhours-voidrun-field-notes";
     const BG = "#171915";
     const IVORY = "#eeeadd";
     const MOSS = "#a2b58b";
@@ -602,6 +603,7 @@
         let elapsed = 0;
         let score = 0;
         let best = readBest();
+        const meta = readMeta();
         let speed = 1;
         let groundOffset = 0;
         let spawnTimer = 0;
@@ -734,6 +736,27 @@
             }
         }
 
+        function readMeta() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(META_KEY) || "{}");
+                return {
+                    fragments: Math.max(0, Number(saved.fragments) || 0),
+                    trials: Math.max(0, Number(saved.trials) || 0),
+                    runs: Math.max(0, Number(saved.runs) || 0)
+                };
+            } catch {
+                return { fragments: 0, trials: 0, runs: 0 };
+            }
+        }
+
+        function saveMeta() {
+            try {
+                localStorage.setItem(META_KEY, JSON.stringify(meta));
+            } catch {
+                // Persistent progression is optional.
+            }
+        }
+
         function formatScore(value) {
             return Math.floor(value).toString().padStart(6, "0");
         }
@@ -759,7 +782,7 @@
                 if (trialActive > 0) parts.push("RIFT TRIAL " + trialProgress + "/3");
                 relicStatus.textContent = parts.length
                     ? parts.join("  //  ")
-                    : "RELIC SYSTEM // COLLECT SHIELDS, OVERDRIVE & RIFT TRIALS";
+                    : "FIELD NOTES // " + meta.fragments + " FRAGMENTS · " + meta.trials + " TRIALS · " + meta.runs + " RUNS";
                 relicStatus.classList.toggle("is-live", parts.length > 0);
             }
         }
@@ -848,6 +871,8 @@
 
         function reset() {
             mode = "playing";
+            meta.runs++;
+            saveMeta();
             elapsed = 0;
             worldTime = 0;
             score = 0;
@@ -1308,6 +1333,9 @@
                             trialActive = 0;
                             score += 250;
                             shards += 3;
+                            meta.fragments += 3;
+                            meta.trials++;
+                            saveMeta();
                             showToast("RIFT TRIAL CLEARED · +250 / 3 SHARDS");
                         }
                     }
@@ -1348,6 +1376,8 @@
                         showToast("OVERDRIVE ONLINE · BONUS SCORE");
                     } else {
                         shards++;
+                        meta.fragments++;
+                        saveMeta();
                         score += 60 * Math.max(1, 1 + Math.floor(combo / 4));
                         addCombo();
                         showToast(`FRAGMENT +60 · ${shards}`);
