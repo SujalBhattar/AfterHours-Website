@@ -33,7 +33,7 @@
     };
 
     async function init() {
-        state.host = document.getElementById("hero-visual");
+        state.host = document.getElementById("hero3d");
 
         if (!state.host) {
             console.warn("[AFTERHOURS] Hero visual container not found.");

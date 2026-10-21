@@ -246,9 +246,8 @@
             }
 
             setArcadeVisible(false);
-            window.AfterhoursBackground?.setLoad(
-                gameId === "drift" ? "paused" : "light"
-            );
+            // Pause the decorative WebGL background while a game is active.
+            window.AfterhoursBackground3D?.stop();
             scrollToTop();
 
             const loading = document.createElement("p");
@@ -287,7 +286,8 @@
             mount.replaceChildren();
 
             setArcadeVisible(true);
-            window.AfterhoursBackground?.setLoad("full");
+            // Resume the decorative WebGL background when returning to the arcade.
+            window.AfterhoursBackground3D?.start();
 
             document.querySelector("#arcade")?.scrollIntoView({
                 block: "start",
