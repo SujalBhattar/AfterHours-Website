@@ -19,7 +19,6 @@
             activeGame = null;
         }
 
-        const showToast = services.showToast || (() => { });
         const onExit = services.onExit || (() => { });
 
         mount.innerHTML = `
