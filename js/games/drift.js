@@ -30,6 +30,8 @@
         let combo = 0;
         let comboTimer = 0;
         let previousCollect = -100;
+        let driftCharge = 0;
+        let driftChains = 0;
         let retryCount = 0;
         let pixelRatioCap = Math.min(devicePixelRatio || 1, 1.5);
         let cleanup = () => { };
@@ -81,6 +83,10 @@
                 <div class="drift-game__combo" aria-live="polite">
                     <span class="drift-game__combo-number">×1</span>
                     <span class="drift-game__combo-label">KEEP THE FLOW</span>
+                </div>
+                <div class="drift-game__drift-meter" aria-live="polite">
+                    <div class="drift-game__drift-copy"><span data-drift-label>DRIFT CHARGE</span><span data-drift-count>0 CHAINS</span></div>
+                    <div class="drift-game__drift-track"><span data-drift-fill></span></div>
                 </div>
 
                 <div class="drift-game__message" aria-live="polite">
@@ -314,6 +320,20 @@
                 text-shadow: 0 0 18px rgba(201,135,112,.45);
             }
 
+            .drift-game__drift-meter {
+                position:absolute;right:clamp(22px,4.2vw,44px);bottom:76px;
+                width:min(210px,42%);pointer-events:none;
+            }
+            .drift-game__drift-copy {
+                display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;
+                color:rgba(238,234,221,.72);font:8px "DM Mono",monospace;letter-spacing:.08em;
+            }
+            .drift-game__drift-track {height:3px;overflow:hidden;background:#eeeadd22;}
+            .drift-game__drift-track span {
+                display:block;width:0;height:100%;background:var(--clay);
+                box-shadow:0 0 12px #c9877088;transition:width .08s linear;
+            }
+
             .drift-game__message {
                 position: absolute;
                 bottom: 58px;
@@ -487,6 +507,9 @@
         const fragmentsDisplay = mount.querySelector(".drift-game__fragments");
         const comboNumber = mount.querySelector(".drift-game__combo-number");
         const comboElement = mount.querySelector(".drift-game__combo");
+        const driftFill = mount.querySelector("[data-drift-fill]");
+        const driftLabel = mount.querySelector("[data-drift-label]");
+        const driftCount = mount.querySelector("[data-drift-count]");
         const message = mount.querySelector(".drift-game__message");
         const steerButtons = [...mount.querySelectorAll("[data-steer]")];
 
@@ -555,6 +578,9 @@
             fragmentsDisplay.textContent = String(fragments);
             comboNumber.textContent = `×${Math.max(1, combo)}`;
             comboElement.classList.toggle("is-hot", combo >= 3);
+            if (driftFill) driftFill.style.width = Math.min(100, driftCharge / 1.6 * 100) + "%";
+            if (driftLabel) driftLabel.textContent = driftCharge >= 1.3 ? "HOLD THE LINE" : "DRIFT CHARGE";
+            if (driftCount) driftCount.textContent = driftChains + " CHAINS";
         }
 
         function setPaused(value) {
@@ -953,6 +979,24 @@
 
                     distance += speed * dt * .85;
                     roadOffset += speed * dt;
+
+                    const isDrifting = speed > 22 && Math.abs(steer) > .58;
+                    if (isDrifting) {
+                        driftCharge += dt * (0.55 + Math.abs(steer) * .7) * (speed / 30);
+                        if (driftCharge >= 1.6) {
+                            driftCharge -= 1.6;
+                            driftChains++;
+                            fragments++;
+                            combo = elapsed - previousCollect < 5 ? combo + 1 : 1;
+                            previousCollect = elapsed;
+                            comboTimer = 5;
+                            message.textContent = "CLEAN DRIFT · FRAGMENT BANKED";
+                            message.style.color = "#c98770";
+                            services.showToast?.("Clean drift chain · +" + combo + " flow");
+                        }
+                    } else {
+                        driftCharge = Math.max(0, driftCharge - dt * .42);
+                    }
 
                     car.position.x = steer * 2.1;
                     car.position.y = .035 + Math.sin(elapsed * 1.8) * .035;
