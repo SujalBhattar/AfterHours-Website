@@ -105,6 +105,12 @@
               opacity:0;transition:opacity .25s;
             }
             .ls-tip.show {opacity:1;}
+            .ls-trial {
+              min-height:30px;display:flex;align-items:center;padding:7px 20px;
+              border-bottom:1px solid #eeeadd13;color:${C.muted};
+              font:9px/1.5 "DM Mono",monospace;letter-spacing:.1em;
+            }
+            .ls-trial.is-live {color:${C.moss};background:linear-gradient(90deg,#a2b58b0c,transparent 75%);}
             .ls-game button:disabled {opacity:.5;cursor:default;}
             @media(max-width:540px) {
               .ls-game {border-radius:12px;}
@@ -130,6 +136,7 @@
             <div><div class="ls-label">COMBO</div><div class="ls-value" data-combo>×1</div></div>
             <div><div class="ls-label">ENERGY</div><div class="ls-value" data-energy>◇ 0</div></div>
           </div>
+          <div class="ls-trial" data-trial aria-live="polite">SIGNAL SCAN // TRIALS BEGIN AT 20 SECONDS</div>
 
           <div class="ls-arena">
             <canvas class="ls-canvas" aria-label="LIGHTSPEED game arena"></canvas>
@@ -170,6 +177,7 @@
         const bestEl = root.querySelector("[data-best]");
         const comboEl = root.querySelector("[data-combo]");
         const energyEl = root.querySelector("[data-energy]");
+        const trialEl = root.querySelector("[data-trial]");
         const tip = root.querySelector("[data-tip]");
 
         let destroyed = false;
@@ -193,6 +201,9 @@
         let energy = 0;
         let streak = 0;
         let lastGateTime = 0;
+        let nextTrialAt = 20;
+        let trialActive = 0;
+        let trialProgress = 0;
         let pointerX = null;
         let dragging = false;
         let touchStartX = 0;
@@ -231,6 +242,12 @@
             bestEl.textContent = fmt(best);
             comboEl.textContent = "×" + combo;
             energyEl.textContent = "◇ " + energy;
+            if (trialEl) {
+                trialEl.textContent = trialActive > 0
+                    ? "RIFT GATE TRIAL  //  " + trialProgress + "/3 CLEAN GATES"
+                    : "SIGNAL SCAN // NEXT TRIAL AT " + Math.ceil(nextTrialAt) + "s";
+                trialEl.classList.toggle("is-live", trialActive > 0);
+            }
         }
 
         function resize() {
@@ -270,6 +287,9 @@
             energy = 1;
             streak = 0;
             lastGateTime = 0;
+            nextTrialAt = 20;
+            trialActive = 0;
+            trialProgress = 0;
             pointerX = null;
             dragging = false;
             keys.clear();
@@ -344,7 +364,8 @@
             const moving = elapsed > 18 && Math.random() < Math.min(.48, elapsed / 180);
             gates.push({
                 y, height: 17, gapCenter: center, gapWidth: gapW,
-                passed: false, color: Math.random() < .78 ? C.moss : C.clay,
+                passed: false, trial: trialActive > 0,
+                color: trialActive > 0 ? C.clay : (Math.random() < .78 ? C.moss : C.clay),
                 phase: Math.random() * 6.28, drift: moving ? (Math.random() - .5) * Math.min(50, elapsed * .65) : 0,
                 previousCenter: center
             });
@@ -406,6 +427,16 @@
 
         function update(dt) {
             elapsed += dt;
+            trialActive = Math.max(0, trialActive - dt);
+            if (elapsed >= nextTrialAt && trialActive <= 0) {
+                trialActive = 8;
+                trialProgress = 0;
+                nextTrialAt += 30;
+                showToast("RIFT TRIAL // CLEAR 3 GATES");
+            } else if (trialActive <= 0 && trialProgress > 0 && trialProgress < 3) {
+                showToast("TRIAL MISSED · FIND THE FLOW");
+                trialProgress = 0;
+            }
             const difficulty = Math.min(2.35, elapsed * .027);
             const worldSpeed = 190 + difficulty * 93;
             scroll += worldSpeed * dt;
@@ -477,6 +508,16 @@
                     score += 90 * combo;
                     lastGateTime = elapsed;
                     burst(player.x, player.y, gate.color, 8, 100);
+                    if (gate.trial && trialActive > 0) {
+                        trialProgress++;
+                        score += 120;
+                        if (trialProgress >= 3) {
+                            trialActive = 0;
+                            score += 400;
+                            energy = Math.min(3, energy + 1);
+                            showToast("RIFT TRIAL CLEARED · +400 / PHASE CELL");
+                        }
+                    }
                     syncHUD();
                 }
             }
