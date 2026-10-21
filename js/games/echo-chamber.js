@@ -177,6 +177,8 @@
     let modeBeforePause = "menu";
     let lastInputAt = 0;
     let pauseSnapshot = null;
+    let mirrorRound = false;
+    let mirrorClears = 0;
 
     const modes = [
       { name: "STANDARD", speed: 620, flash: 340, gap: 260, points: 10 },
@@ -259,9 +261,13 @@
       }
 
       progressLabelEl.textContent = state === "input"
-        ? `${inputIndex} OF ${sequence.length} NOTES REPEATED`
+        ? mirrorRound
+          ? `MIRROR ROUND · ${inputIndex} OF ${sequence.length} / REVERSE ORDER`
+          : `${inputIndex} OF ${sequence.length} NOTES REPEATED`
         : state === "watch"
-          ? `ROUND ${String(round).padStart(2, "0")} / LISTEN CLOSELY`
+          ? mirrorRound
+            ? `ROUND ${String(round).padStart(2, "0")} / REVERSE ORDER CHALLENGE`
+            : `ROUND ${String(round).padStart(2, "0")} / LISTEN CLOSELY`
           : state === "between"
             ? "PATTERN HELD / PREPARING NEXT ROUND"
             : "A SMALL EXERCISE IN ATTENTION";
@@ -283,6 +289,8 @@
       invalidateTimers();
       sequence = [];
       inputIndex = 0;
+      mirrorRound = false;
+      mirrorClears = 0;
       score = 0;
       round = 0;
       streak = 0;
@@ -314,9 +322,13 @@
       roundPerfect = true;
       sequence.push(Math.floor(Math.random() * pads.length));
       round = sequence.length;
+      mirrorRound = round > 0 && round % 5 === 0;
       syncHUD();
       renderProgress();
-      statusEl.textContent = "WATCH THE PATTERN";
+      statusEl.textContent = mirrorRound
+        ? "MIRROR ROUND / WATCH, THEN REPEAT BACKWARDS"
+        : "WATCH THE PATTERN";
+      if (mirrorRound) showToast("MIRROR ROUND · REVERSE THE ECHO");
       const currentToken = token;
       let i = 0;
       const config = modes[modeIndex];
@@ -350,7 +362,11 @@
 
       flashPad(index, 170);
 
-      if (index !== sequence[inputIndex]) {
+      const expectedIndex = mirrorRound
+        ? sequence[sequence.length - 1 - inputIndex]
+        : sequence[inputIndex];
+
+      if (index !== expectedIndex) {
         roundPerfect = false;
         streak = 0;
         syncHUD();
@@ -382,6 +398,11 @@
         enablePads(false);
         streak++;
         if (roundPerfect) score += 20 * round;
+        if (mirrorRound) {
+          mirrorClears++;
+          score += 125 * Math.max(1, Math.floor(streak / 2));
+          showToast("MIRROR BROKEN · BONUS +" + (125 * Math.max(1, Math.floor(streak / 2))));
+        }
         if (score > best) {
           best = score;
           saveBest();
