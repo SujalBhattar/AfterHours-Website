@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#171915">
+    <meta name="color-scheme" content="dark">
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%2365775a'/%3E%3Ctext x='16' y='23' font-size='22' text-anchor='middle' fill='%23eeeadd' font-family='serif' font-style='italic'%3Ea.%3C/text%3E%3C/svg%3E">
+    <meta name="description"
+        content="AFTERHOURS is a little digital playground. Play, explore, and lose track of time.">
+    <title>AFTERHOURS — A Little Digital Playground</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;450;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Space+Grotesk:wght@500;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- Live background layers: 3D scene (three.js) with 2D canvas fallback -->
+    <div id="bg3d" aria-hidden="true"></div>
+    <canvas id="ambient-canvas" aria-hidden="true"></canvas>
+    <div id="ambient-sculpture" aria-hidden="true"></div>
+
+    <header class="ah-header">
+        <a class="ah-logo" href="#top" aria-label="AFTERHOURS home">
+            <span class="ah-logo__mark" aria-hidden="true">a.</span>
+            <span>AFTERHOURS</span>
+        </a>
+
+        <nav class="ah-nav" aria-label="Main navigation">
+            <a href="#arcade">The arcade <span>04</span></a>
+            <a href="#about">About</a>
+        </nav>
+
+        <div class="ah-header__status">
+            <span class="ah-status-dot" aria-hidden="true"></span>
+            YOUR TIME IS YOURS
+        </div>
+    </header>
+
+    <main>
+        <section class="ah-hero" id="top">
+            <div class="ah-hero__copy">
+                <p class="ah-eyebrow">
+                    <span class="ah-eyebrow__line"></span>
+                    A LITTLE DIGITAL PLAYGROUND
+                </p>
+
+                <h1 id="hero-title">
+                    Make time<br>
+                    <span>disappear.</span>
+                </h1>
+
+                <p class="ah-hero__description">
+                    Four little worlds. No grand mission.
+                    Just you, a few buttons, and wherever the next
+                    few minutes decide to go.
+                </p>
+
+                <a class="ah-button" href="#arcade">
+                    Enter the arcade
+                    <span aria-hidden="true">↘</span>
+                </a>
+
+                <p class="ah-hero__note">MADE FOR THE SPACE BETWEEN EVERYTHING.</p>
+            </div>
+
+            <div class="ah-hero__art" aria-hidden="true">
+                <!-- Live 3D model (hero3d.js). The CSS planet below is the fallback. -->
+                <div class="ah-hero__model" id="hero3d"></div>
+
+
+                <div class="ah-portal">
+                    <div class="ah-portal__back"></div>
+                    <div class="ah-portal__ring ah-portal__ring--outer"></div>
+                    <div class="ah-portal__ring ah-portal__ring--middle"></div>
+                    <div class="ah-portal__ring ah-portal__ring--inner"></div>
+                    <div class="ah-portal__core"></div>
+                    <div class="ah-portal__ground"></div>
+                </div>
+            </div>
+
+            <div class="ah-hero__index" aria-hidden="true">
+                <span>01</span>
+                <span class="ah-hero__index-line"></span>
+                <span>04</span>
+            </div>
+        </section>
+
+        <div class="ah-marquee" aria-label="Play without a purpose">
+            <div class="ah-marquee__track" aria-hidden="true">
+                <span>PLAY WITHOUT A PURPOSE</span><span>✳</span>
+                <span>FOLLOW YOUR CURIOSITY</span><span>✳</span>
+                <span>TAKE THE LONG WAY</span><span>✳</span>
+                <span>PLAY WITHOUT A PURPOSE</span><span>✳</span>
+                <span>FOLLOW YOUR CURIOSITY</span><span>✳</span>
+                <span>TAKE THE LONG WAY</span><span>✳</span>
+            </div>
+        </div>
+
+        <section class="ah-arcade" id="arcade">
+            <div class="ah-section-heading">
+                <div>
+                    <p class="ah-eyebrow">
+                        <span class="ah-eyebrow__line"></span>
+                        PICK YOUR LITTLE DISTRACTION
+                    </p>
+                    <h2>Where to <em>now?</em></h2>
+                </div>
+
+                <p class="ah-section-heading__aside">
+                    FOUR WORLDS.<br>
+                    NO WRONG TURNS.
+                </p>
+            </div>
+
+            <div class="ah-game-grid">
+                <!-- LIGHTSPEED -->
+                <button class="ah-game-card ah-game-card--lightspeed" type="button" data-open-game="lightspeed"
+                    aria-label="Play Lightspeed, a fast reflex game">
+                    <span class="ah-game-card__art" aria-hidden="true">
+                        <span class="ah-lightspeed-art">
+                            <span class="ah-lightspeed-art__gate ah-lightspeed-art__gate--back"></span>
+                            <span class="ah-lightspeed-art__gate ah-lightspeed-art__gate--middle"></span>
+                            <span class="ah-lightspeed-art__gate ah-lightspeed-art__gate--front"></span>
+                            <span class="ah-lightspeed-art__floor"></span>
+                            <span class="ah-lightspeed-art__orb"></span>
+                        </span>
+                        <span class="ah-game-card__number">01</span>
+                        <span class="ah-game-card__play" aria-hidden="true">↗</span>
+                    </span>
+
+                    <span class="ah-game-card__body">
+                        <span class="ah-game-card__category">REFLEX / PRECISION</span>
+                        <span class="ah-game-card__title">Lightspeed</span>
+                        <span class="ah-game-card__description">
+                            Read the gaps. Trust your instincts. Keep moving.
+                        </span>
+                        <span class="ah-game-card__footer">
+                            <span>KEYBOARD / POINTER</span>
+                            <span class="ah-game-card__arrow" aria-hidden="true">↗</span>
+                        </span>
+                    </span>
+                </button>
+
+                <!-- VOIDRUN -->
+                <button class="ah-game-card ah-game-card--voidrun" type="button" data-open-game="voidrun"
+                    aria-label="Play Voidrun, an endless running game">
+                    <span class="ah-game-card__art" aria-hidden="true">
+                        <span class="ah-voidrun-art">
+                            <span class="ah-voidrun-art__sun"></span>
+                            <span class="ah-voidrun-art__mountain ah-voidrun-art__mountain--back"></span>
+                            <span class="ah-voidrun-art__mountain ah-voidrun-art__mountain--front"></span>
+                            <span class="ah-voidrun-art__track"></span>
+                            <span class="ah-voidrun-art__runner"></span>
+                        </span>
+                        <span class="ah-game-card__number">02</span>
+                        <span class="ah-game-card__play" aria-hidden="true">↗</span>
+                    </span>
+
+                    <span class="ah-game-card__body">
+                        <span class="ah-game-card__category">ENDLESS / MOMENTUM</span>
+                        <span class="ah-game-card__title">Voidrun</span>
+                        <span class="ah-game-card__description">
+                            One more jump. One more obstacle. One more run.
+                        </span>
+                        <span class="ah-game-card__footer">
+                            <span>KEYBOARD / TOUCH</span>
+                            <span class="ah-game-card__arrow" aria-hidden="true">↗</span>
+                        </span>
+                    </span>
+                </button>
+
+                <!-- ECHO CHAMBER -->
+                <button class="ah-game-card ah-game-card--echo" type="button" data-open-game="echo-chamber"
+                    aria-label="Play Echo Chamber, a memory game">
+                    <span class="ah-game-card__art" aria-hidden="true">
+                        <span class="ah-echo-art">
+                            <span class="ah-echo-art__orbit ah-echo-art__orbit--one"></span>
+                            <span class="ah-echo-art__orbit ah-echo-art__orbit--two"></span>
+                            <span class="ah-echo-art__node ah-echo-art__node--one"></span>
+                            <span class="ah-echo-art__node ah-echo-art__node--two"></span>
+                            <span class="ah-echo-art__node ah-echo-art__node--three"></span>
+                            <span class="ah-echo-art__node ah-echo-art__node--four"></span>
+                            <span class="ah-echo-art__core"></span>
+                        </span>
+                        <span class="ah-game-card__number">03</span>
+                        <span class="ah-game-card__play" aria-hidden="true">↗</span>
+                    </span>
+
+                    <span class="ah-game-card__body">
+                        <span class="ah-game-card__category">MEMORY / PATTERNS</span>
+                        <span class="ah-game-card__title">Echo Chamber</span>
+                        <span class="ah-game-card__description">
+                            Watch the pattern. Remember the rhythm. Repeat.
+                        </span>
+                        <span class="ah-game-card__footer">
+                            <span>FOCUS / TOUCH</span>
+                            <span class="ah-game-card__arrow" aria-hidden="true">↗</span>
+                        </span>
+                    </span>
+                </button>
+
+                <!-- DRIFT -->
+                <button class="ah-game-card ah-game-card--drift" type="button" data-open-game="drift"
+                    aria-label="Play Drift, an atmospheric driving game">
+                    <span class="ah-game-card__art" aria-hidden="true">
+                        <span class="ah-drift-art">
+                            <span class="ah-drift-art__moon"></span>
+                            <span class="ah-drift-art__island ah-drift-art__island--one"></span>
+                            <span class="ah-drift-art__island ah-drift-art__island--two"></span>
+                            <span class="ah-drift-art__road"></span>
+                            <span class="ah-drift-art__car"></span>
+                            <span class="ah-drift-art__horizon"></span>
+                        </span>
+                        <span class="ah-game-card__number">04</span>
+                        <span class="ah-game-card__play" aria-hidden="true">↗</span>
+                    </span>
+
+                    <span class="ah-game-card__body">
+                        <span class="ah-game-card__category">EXPLORATION / ATMOSPHERE</span>
+                        <span class="ah-game-card__title">Drift</span>
+                        <span class="ah-game-card__description">
+                            A road to nowhere. A sky that never ends.
+                        </span>
+                        <span class="ah-game-card__footer">
+                            <span>KEYBOARD / TOUCH</span>
+                            <span class="ah-game-card__arrow" aria-hidden="true">↗</span>
+                        </span>
+                    </span>
+                </button>
+            </div>
+
+            <p class="ah-arcade__footnote">
+                NO LEADERBOARDS TO IMPRESS. NO DEADLINES TO BEAT.
+                JUST A LITTLE TIME THAT BELONGS TO YOU.
+            </p>
+        </section>
+
+        <!-- GAME STAGE: existing launcher IDs preserved -->
+        <section class="ah-stage" id="game-stage" hidden>
+            <div class="ah-stage__top">
+                <div>
+                    <p class="ah-eyebrow">
+                        <span class="ah-eyebrow__line"></span>
+                        YOUR LITTLE WORLD
+                    </p>
+                    <h2 id="stage-kicker">Now playing</h2>
+                </div>
+
+                <button class="ah-button ah-button--quiet" id="back-to-arcade" type="button">
+                    <span aria-hidden="true">←</span>
+                    Back to arcade
+                </button>
+            </div>
+
+            <div class="ah-stage__frame" id="game-mount"></div>
+        </section>
+
+        <section class="ah-about" id="about">
+            <div class="ah-about__visual" aria-hidden="true">
+                <div class="ah-about__circle ah-about__circle--outer"></div>
+                <div class="ah-about__circle ah-about__circle--inner"></div>
+                <div class="ah-about__stone"></div>
+            </div>
+
+            <div class="ah-about__copy">
+                <p class="ah-eyebrow">
+                    <span class="ah-eyebrow__line"></span>
+                    A SMALL REMINDER
+                </p>
+                <h2>Not everything<br>needs a <em>purpose.</em></h2>
+                <p>
+                    Some things can simply be fun. No progress to optimise,
+                    no productivity hack to unlock. Just a place to wander,
+                    play a little, and return to your day when you're ready.
+                </p>
+                <a href="#arcade" class="ah-text-link">
+                    Find your next distraction <span aria-hidden="true">↗</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="ah-footer">
+        <a class="ah-logo" href="#top">
+            <span class="ah-logo__mark" aria-hidden="true">a.</span>
+            <span>AFTERHOURS</span>
+        </a>
+
+        <p>MADE FOR THE SPACE BETWEEN EVERYTHING.</p>
+        <a href="#top" class="ah-footer__top">BACK TO TOP ↑</a>
+    </footer>
+
+    <div class="ah-toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- Keep existing game scripts and their IDs unchanged. -->
+    <script src="js/ambient.js" defer></script>
+    <script src="js/background3d.js" defer></script>
+    <script src="js/hero3d.js" defer></script>
+    <script src="js/games/lightspeed.js" defer></script>
+    <script src="js/games/voidrun.js" defer></script>
+    <script src="js/games/echo-chamber.js" defer></script>
+    <script src="js/games/drift.js" defer></script>
+    <script src="js/main.js" defer></script>
+</body>
+
+</html>
